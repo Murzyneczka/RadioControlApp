@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceFolder}/RadioControlApp.csproj"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-android",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["run", "--framework", "net9.0-android"],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
