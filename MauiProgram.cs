@@ -25,8 +25,8 @@ public static class MauiProgram
         builder.Services.AddHttpClient<IRadioDeviceService, RadioApiService>(client =>
         {
 
-            var baseUrl = "https://radio-device-api.example.com/";
-            var timeoutSeconds = 30;
+            /*var baseUrl = "https://radio-device-api.example.com/";
+            var timeoutSeconds = 30;*/
 
             var baseUrl = builder.Configuration["RadioDeviceApi:BaseUrl"] ?? "https://radio-device-api.example.com/";
             var timeoutSeconds = int.Parse(builder.Configuration["RadioDeviceApi:TimeoutSeconds"] ?? "30");
