@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RadioControlApp.Views.FMConfigurationPage"
+             Title="Konfiguracja FM">
+    
+    <ContentPage.Resources>
+        <Style TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#1976D2" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        
+        <Style TargetType="Entry">
+            <Setter Property="BackgroundColor" Value="#F5F5F5" />
+            <Setter Property="TextColor" Value="#333" />
+            <Setter Property="PlaceholderColor" Value="#666" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="HeightRequest" Value="40" />
+        </Style>
+        
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HasShadow" Value="True" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="Padding" Value="15" />
+        </Style>
+    </ContentPage.Resources>
+    
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+            
+            <!-- Status Message -->
+            <Label Text="{Binding StatusMessage}" 
+                   IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"
+                   TextColor="{Binding HasError, Converter={StaticResource BoolToStatusColorConverter}}"
+                   FontAttributes="Bold" />
+            
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsVisible="{Binding IsLoading}" 
+                             IsRunning="{Binding IsLoading}"
+                             Color="#1976D2" />
+            
+            <!-- Current Status Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Aktualny status" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                        <StackLayout Grid.Column="0">
+                            <Label Text="Częstotliwość" FontAttributes="Bold" />
+                            <Label Text="{Binding CurrentFrequency, StringFormat='{0:F1} MHz'}" 
+                                   FontSize="20" 
+                                   TextColor="#4CAF50" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1">
+                            <Label Text="Głośność" FontAttributes="Bold" />
+                            <Label Text="{Binding CurrentVolume, StringFormat='{0}%'}" 
+                                   FontSize="20" 
+                                   TextColor="#4CAF50" />
+                        </StackLayout>
+                    </Grid>
+                    
+                    <Button Text="Odśwież status" 
+                            Command="{Binding LoadDeviceStatusCommand}"
+                            BackgroundColor="#4CAF50" />
+                </StackLayout>
+            </Frame>
+            
+            <!-- Manual Tuning Section -->
+            <Frame>
+                <StackLayout Spacing="15">
+                    <Label Text="Ręczne strojenie" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <!-- Frequency Control -->
+                    <StackLayout>
+                        <Label Text="{Binding CurrentFrequency, StringFormat='Częstotliwość: {0:F1} MHz'}" 
+                               FontAttributes="Bold" />
+                        <Slider Value="{Binding CurrentFrequency}" 
+                                Minimum="87.5" 
+                                Maximum="108.0" 
+                                ThumbColor="#1976D2"
+                                MinimumTrackColor="#1976D2"
+                                MaximumTrackColor="#E0E0E0" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="87.5 MHz" 
+                                    Command="{Binding SetFrequencyCommand}"
+                                    CommandParameter="87.5"
+                                    FontSize="12"
+                                    Grid.Column="0" />
+                            <Button Text="108.0 MHz" 
+                                    Command="{Binding SetFrequencyCommand}"
+                                    CommandParameter="108.0"
+                                    FontSize="12"
+                                    Grid.Column="1" />
+                        </Grid>
+                        <Button Text="Ustaw częstotliwość" 
+                                Command="{Binding SetFrequencyCommand}" />
+                    </StackLayout>
+                    
+                    <!-- Volume Control -->
+                    <StackLayout>
+                        <Label Text="{Binding CurrentVolume, StringFormat='Głośność: {0}%'}" 
+                               FontAttributes="Bold" />
+                        <Slider Value="{Binding CurrentVolume}" 
+                                Minimum="0" 
+                                Maximum="100" 
+                                ThumbColor="#1976D2"
+                                MinimumTrackColor="#1976D2"
+                                MaximumTrackColor="#E0E0E0" />
+                        <Button Text="Ustaw głośność" 
+                                Command="{Binding SetVolumeCommand}" />
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Add New Station Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Dodaj nową stację" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Entry Text="{Binding NewStation.Name}" 
+                           Placeholder="Nazwa stacji (np. Radio RMF FM)" />
+                    
+                    <StackLayout>
+                        <Label Text="{Binding NewStation.Frequency, StringFormat='Częstotliwość: {0:F1} MHz'}" />
+                        <Slider Value="{Binding NewStation.Frequency}" 
+                                Minimum="87.5" 
+                                Maximum="108.0" 
+                                ThumbColor="#1976D2" />
+                    </StackLayout>
+                    
+                    <Entry Text="{Binding NewStation.Description}" 
+                           Placeholder="Opis (opcjonalny)" />
+                    
+                    <Switch x:Name="FavoriteSwitch" 
+                            IsToggled="{Binding NewStation.IsFavorite}"
+                            HorizontalOptions="Start" />
+                    <Label Text="Dodaj do ulubionych" 
+                           VerticalOptions="Center" />
+                    
+                    <Button Text="Dodaj stację" 
+                            Command="{Binding AddStationCommand}" />
+                </StackLayout>
+            </Frame>
+            
+            <!-- Saved Stations Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Zapisane stacje FM" 
+                               FontSize="18" 
+                               FontAttributes="Bold" 
+                               TextColor="#1976D2"
+                               Grid.Column="0" />
+                        <Button Text="Odśwież" 
+                                Command="{Binding LoadStationsCommand}"
+                                BackgroundColor="#4CAF50"
+                                FontSize="12"
+                                Grid.Column="1" />
+                    </Grid>
+                    
+                    <CollectionView ItemsSource="{Binding Stations}"
+                                    SelectedItem="{Binding SelectedStation}"
+                                    SelectionMode="Single">
+                        <CollectionView.EmptyView>
+                            <Label Text="Brak zapisanych stacji FM" 
+                                   HorizontalTextAlignment="Center" 
+                                   TextColor="#666" />
+                        </CollectionView.EmptyView>
+                        
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,5">
+                                    <Frame BackgroundColor="#F8F9FA" 
+                                           CornerRadius="5" 
+                                           Margin="0,2"
+                                           Padding="10">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" 
+                                              ColumnSpacing="10">
+                                            
+                                            <!-- Favorite Star -->
+                                            <Label Text="★" 
+                                                   TextColor="#FFD700" 
+                                                   FontSize="20"
+                                                   IsVisible="{Binding IsFavorite}"
+                                                   VerticalOptions="Center"
+                                                   Grid.Column="0" />
+                                            
+                                            <!-- Station Info -->
+                                            <StackLayout Grid.Column="1">
+                                                <Label Text="{Binding Name}" 
+                                                       FontAttributes="Bold" 
+                                                       FontSize="16" />
+                                                <Label Text="{Binding Frequency, StringFormat='{0:F1} MHz'}" 
+                                                       FontFamily="Courier" 
+                                                       TextColor="#666" />
+                                                <Label Text="{Binding Description}" 
+                                                       FontSize="12" 
+                                                       TextColor="#999"
+                                                       IsVisible="{Binding Description, Converter={StaticResource StringToBoolConverter}}" />
+                                            </StackLayout>
+                                            
+                                            <!-- Action Buttons -->
+                                            <Button Text="Nastraj" 
+                                                    Command="{Binding Path=BindingContext.TuneToStationCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#4CAF50"
+                                                    FontSize="12"
+                                                    Grid.Column="2" />
+                                            
+                                            <Button Text="♡" 
+                                                    Command="{Binding Path=BindingContext.ToggleFavoriteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#FF6F00"
+                                                    FontSize="16"
+                                                    Grid.Column="3" />
+                                            
+                                            <Button Text="Usuń" 
+                                                    Command="{Binding Path=BindingContext.DeleteStationCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#F44336"
+                                                    FontSize="12"
+                                                    Grid.Column="4" />
+                                        </Grid>
+                                    </Frame>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+            
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
