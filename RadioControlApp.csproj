@@ -10,23 +10,48 @@
     <ApplicationTitle>RadioControlApp</ApplicationTitle>
     <ApplicationId>com.example.radiocontrolapp</ApplicationId>
     <ApplicationVersion>1.0</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    
+    <!-- Android specific -->
+    <AndroidMinSdkVersion>21</AndroidMinSdkVersion>
+    <AndroidTargetSdkVersion>35</AndroidTargetSdkVersion>
+    <AndroidVersionCode>1</AndroidVersionCode>
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <AndroidUseAapt2>True</AndroidUseAapt2>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   
   <ItemGroup>
+    <!-- MAUI Core -->
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.51" />
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.51" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    
     <!-- Zależności NuGet -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
-    <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="SQLite-net-pcl" Version="1.9.172" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.0-rc2" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
   </ItemGroup>
   
   <ItemGroup>
-    <!-- Zasoby (np. ikony, fonty) -->
-    <MauiFont Include="Resources\Fonts\*" />
+    <!-- App Icon -->
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+    <!-- Splash Screen -->
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+    <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
+    <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+    <!-- Custom Fonts -->
+    <MauiFont Include="Resources\Fonts\*" />
+
+    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
   
 </Project>
