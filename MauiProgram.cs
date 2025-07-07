@@ -1,5 +1,5 @@
 using FluentValidation;
-using Microsoft.Extensions.Configuration;
+//cursor/design-remote-control-application-functions-d9c3
 using Microsoft.Extensions.DependencyInjection;
 using RadioControlApp.Models;
 using RadioControlApp.Services;
@@ -21,14 +21,16 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // Konfiguracja appsettings.json
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
         // Rejestracja serwisów
         builder.Services.AddHttpClient<IRadioDeviceService, RadioApiService>(client =>
         {
+/*<<<<<< cursor/design-remote-control-application-functions-d9c3
+            var baseUrl = "https://radio-device-api.example.com/";
+            var timeoutSeconds = 30;
+=======
             var baseUrl = builder.Configuration["RadioDeviceApi:BaseUrl"] ?? "https://radio-device-api.example.com/";
             var timeoutSeconds = int.Parse(builder.Configuration["RadioDeviceApi:TimeoutSeconds"] ?? "30");
+>>>>>>--> main*/
             
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);

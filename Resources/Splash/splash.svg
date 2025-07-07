@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="456" height="456" fill="#1976D2"/>
+    
+    <!-- Radio waves with animation effect -->
+    <g opacity="0.8">
+        <path d="M228 120C280.5 120 322 161.5 322 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M228 140C269.4 140 302 172.6 302 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M228 160C258.4 160 282 183.6 282 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        
+        <!-- Reverse waves -->
+        <path d="M228 120C175.5 120 134 161.5 134 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M228 140C186.6 140 154 172.6 154 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M228 160C197.6 160 174 183.6 174 214" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Central antenna -->
+    <circle cx="228" cy="214" r="12" fill="white"/>
+    <rect x="222" y="180" width="12" height="34" fill="white"/>
+    <rect x="216" y="170" width="24" height="10" fill="white"/>
+    
+    <!-- App title -->
+    <text x="228" y="300" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="bold">Radio Control</text>
+    <text x="228" y="330" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">Zdalne sterowanie sprzętem radiowym</text>
+    
+    <!-- Loading indicator -->
+    <circle cx="228" cy="380" r="6" fill="white" opacity="0.6">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+</svg>

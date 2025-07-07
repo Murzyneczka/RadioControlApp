@@ -34,7 +34,10 @@
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurface}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource Surface}}" />
+<!--<<<<<< cursor/design-remote-control-application-functions-d9c3
+=======
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
+>>>>>>--> main
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="14" />
