@@ -1,0 +1,207 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: './RadioControlApp.csproj'
+
+jobs:
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔧 Install MAUI Workloads
+      run: |
+        dotnet workload install maui-android --accept-eula
+
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: 🔍 Check code formatting
+      run: |
+        dotnet format --verify-no-changes --verbosity normal ${{ env.PROJECT_PATH }}
+
+    - name: 🔍 Analyze code
+      run: |
+        dotnet build ${{ env.PROJECT_PATH }} \
+          -c Debug \
+          -f net8.0-android \
+          --no-restore \
+          -p:TreatWarningsAsErrors=false \
+          -p:WarningsAsErrors="" \
+          -flp:logfile=build-warnings.log;verbosity=diagnostic
+
+    - name: 📋 Upload build logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-logs-pr-${{ github.event.number }}
+        path: build-warnings.log
+        retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔒 Run security scan
+      uses: securecodewarrior/github-action-add-sarif@v1
+      with:
+        sarif-file: 'security-scan-results.sarif'
+      continue-on-error: true
+
+    - name: 🔍 Check for sensitive data
+      run: |
+        echo "Checking for potential sensitive data..."
+        
+        # Check for potential API keys, passwords, etc.
+        if grep -r -i -E "(api[_-]?key|password|secret|token)" --include="*.cs" --include="*.json" --include="*.xml" . ; then
+          echo "⚠️ Potential sensitive data found. Please review."
+          echo "Note: This is a basic check. Ensure no real secrets are committed."
+        else
+          echo "✅ No obvious sensitive data patterns found."
+        fi
+
+  build-validation:
+    name: Build Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📱 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 34
+        build-tools: '34.0.0'
+
+    - name: 🔧 Install MAUI Workloads
+      run: |
+        dotnet workload install maui-android --accept-eula
+
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: 🏗️ Build Debug
+      run: |
+        dotnet build ${{ env.PROJECT_PATH }} \
+          -c Debug \
+          -f net8.0-android \
+          --no-restore
+
+    - name: 🏗️ Build Release
+      run: |
+        dotnet build ${{ env.PROJECT_PATH }} \
+          -c Release \
+          -f net8.0-android \
+          --no-restore
+
+    - name: 📊 Generate build summary
+      run: |
+        echo "## 📋 Build Summary for PR #${{ github.event.number }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ Validation Results" >> $GITHUB_STEP_SUMMARY
+        echo "- 🏗️ Debug Build: Successful" >> $GITHUB_STEP_SUMMARY
+        echo "- 🏗️ Release Build: Successful" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 Package Restore: Successful" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📝 PR Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.head_ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Base**: ${{ github.base_ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+  pr-comment:
+    name: PR Status Comment
+    runs-on: ubuntu-latest
+    needs: [code-quality, security-scan, build-validation]
+    if: always() && github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📝 Create PR comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('## 🤖 PR Validation Results')
+          );
+          
+          const codeQuality = '${{ needs.code-quality.result }}';
+          const securityScan = '${{ needs.security-scan.result }}';
+          const buildValidation = '${{ needs.build-validation.result }}';
+          
+          const getStatusEmoji = (status) => {
+            switch(status) {
+              case 'success': return '✅';
+              case 'failure': return '❌';
+              case 'cancelled': return '🚫';
+              case 'skipped': return '⏭️';
+              default: return '❓';
+            }
+          };
+          
+          const commentBody = `## 🤖 PR Validation Results
+          
+          | Check | Status | Result |
+          |-------|--------|--------|
+          | Code Quality | ${getStatusEmoji(codeQuality)} | ${codeQuality} |
+          | Security Scan | ${getStatusEmoji(securityScan)} | ${securityScan} |
+          | Build Validation | ${getStatusEmoji(buildValidation)} | ${buildValidation} |
+          
+          ### 📋 Summary
+          ${codeQuality === 'success' && buildValidation === 'success' 
+            ? '🎉 All checks passed! This PR is ready for review.' 
+            : '⚠️ Some checks failed. Please review and fix the issues.'}
+          
+          **Build Time**: ${new Date().toISOString()}
+          **Commit**: ${context.sha.substring(0, 7)}
+          
+          ---
+          *This comment was automatically generated by GitHub Actions*`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: commentBody
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+          }

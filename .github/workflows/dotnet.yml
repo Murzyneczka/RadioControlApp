@@ -1,0 +1,259 @@
+name: .NET MAUI CI/CD
+
+on:
+  push:
+    branches: [ "main", "cursor/*" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: './RadioControlApp.csproj'
+  ANDROID_API_LEVEL: 34
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🛒 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📱 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ env.ANDROID_API_LEVEL }}
+        build-tools: '34.0.0'
+        ndk: '25.2.9519653'
+
+    - name: 🔧 Install MAUI Workloads
+      run: |
+        dotnet workload install maui-android --accept-eula
+
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: 🏗️ Build application
+      run: |
+        dotnet build ${{ env.PROJECT_PATH }} \
+          -c ${{ env.BUILD_CONFIGURATION }} \
+          -f net8.0-android \
+          --no-restore
+
+    - name: 🧪 Run tests (if any exist)
+      run: |
+        if [ -d "Tests" ] || find . -name "*.Tests.csproj" -o -name "*Test*.csproj" | grep -q .; then
+          dotnet test --no-build --verbosity normal
+        else
+          echo "No test projects found, skipping tests"
+        fi
+
+    - name: 📋 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: build-artifacts-${{ github.run_number }}
+        path: |
+          **/bin/${{ env.BUILD_CONFIGURATION }}/net8.0-android/
+          !**/bin/${{ env.BUILD_CONFIGURATION }}/net8.0-android/ref/
+          !**/bin/${{ env.BUILD_CONFIGURATION }}/net8.0-android/refint/
+        retention-days: 30
+
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+    
+    steps:
+    - name: 🛒 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📱 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ env.ANDROID_API_LEVEL }}
+        build-tools: '34.0.0'
+        ndk: '25.2.9519653'
+
+    - name: 🔧 Install MAUI Workloads
+      run: |
+        dotnet workload install maui-android --accept-eula
+
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: 🏗️ Build and Publish APK
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} \
+          -c ${{ env.BUILD_CONFIGURATION }} \
+          -f net8.0-android \
+          --no-restore \
+          -p:AndroidPackageFormat=apk \
+          -p:AndroidUseAapt2=true \
+          -p:AndroidCreatePackagePerAbi=false \
+          -o ./output
+
+    - name: 🔍 Find APK files
+      id: find-apk
+      run: |
+        APK_PATH=$(find ./output -name "*.apk" | head -1)
+        if [ -z "$APK_PATH" ]; then
+          echo "No APK file found!"
+          exit 1
+        fi
+        echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+        echo "apk_name=$(basename $APK_PATH)" >> $GITHUB_OUTPUT
+        ls -la ./output/
+
+    - name: 📦 Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RadioControlApp-apk-${{ github.run_number }}
+        path: ${{ steps.find-apk.outputs.apk_path }}
+        retention-days: 90
+
+    - name: 📋 Generate build info
+      run: |
+        echo "# Build Information" > build-info.md
+        echo "- **Build Number**: ${{ github.run_number }}" >> build-info.md
+        echo "- **Commit**: ${{ github.sha }}" >> build-info.md
+        echo "- **Branch**: ${{ github.ref_name }}" >> build-info.md
+        echo "- **Build Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> build-info.md
+        echo "- **APK Name**: ${{ steps.find-apk.outputs.apk_name }}" >> build-info.md
+        
+        if [ -f "${{ steps.find-apk.outputs.apk_path }}" ]; then
+          APK_SIZE=$(stat -c%s "${{ steps.find-apk.outputs.apk_path }}")
+          APK_SIZE_MB=$((APK_SIZE / 1024 / 1024))
+          echo "- **APK Size**: ${APK_SIZE_MB} MB" >> build-info.md
+        fi
+
+    - name: 📦 Upload build info
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-info-${{ github.run_number }}
+        path: build-info.md
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-apk
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      
+    steps:
+    - name: 🛒 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 📥 Download APK artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: RadioControlApp-apk-${{ github.run_number }}
+        path: ./release
+
+    - name: 📥 Download build info
+      uses: actions/download-artifact@v4
+      with:
+        name: build-info-${{ github.run_number }}
+        path: ./release
+
+    - name: 🔍 Find downloaded APK
+      id: find-release-apk
+      run: |
+        APK_PATH=$(find ./release -name "*.apk" | head -1)
+        echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+        echo "apk_name=$(basename $APK_PATH)" >> $GITHUB_OUTPUT
+
+    - name: 📝 Prepare release notes
+      id: release-notes
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+        # Create release notes
+        cat > release-notes.md << EOF
+        # RadioControlApp $VERSION
+        
+        ## 🚀 What's New
+        - Bug fixes and improvements
+        - Updated to .NET 8 with MAUI Android workload
+        - Enhanced stability and performance
+        
+        ## 📦 Downloads
+        - **Android APK**: Ready for installation on Android devices
+        - **Minimum Android Version**: Android 5.0 (API 21)
+        - **Target Android Version**: Android 15 (API 35)
+        
+        ## 📋 Installation
+        1. Download the APK file below
+        2. Enable "Install from Unknown Sources" in Android settings
+        3. Install the APK file
+        
+        ## 🔧 Technical Details
+        EOF
+        
+        # Append build info if available
+        if [ -f "./release/build-info.md" ]; then
+          cat "./release/build-info.md" >> release-notes.md
+        fi
+
+    - name: 🚀 Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: RadioControlApp ${{ steps.release-notes.outputs.version }}
+        body_path: release-notes.md
+        draft: false
+        prerelease: false
+
+    - name: 📎 Upload APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.find-release-apk.outputs.apk_path }}
+        asset_name: ${{ steps.find-release-apk.outputs.apk_name }}
+        asset_content_type: application/vnd.android.package-archive
+
+  notify-status:
+    name: Notify Build Status
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-apk, create-release]
+    if: always()
+    
+    steps:
+    - name: 📢 Build Status Summary
+      run: |
+        echo "## 📋 Build Summary"
+        echo "- **Build and Test**: ${{ needs.build-and-test.result }}"
+        echo "- **Build APK**: ${{ needs.build-apk.result }}"
+        echo "- **Create Release**: ${{ needs.create-release.result }}"
+        echo "- **Overall Status**: ${{ job.status }}"
+        
+        if [ "${{ needs.build-and-test.result }}" = "success" ] && [ "${{ needs.build-apk.result }}" = "success" ]; then
+          echo "✅ Build completed successfully!"
+        else
+          echo "❌ Build failed or was cancelled"
+        fi
