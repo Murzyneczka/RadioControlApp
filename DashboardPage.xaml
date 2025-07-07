@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:charts="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             x:Class="RadioControlApp.Views.DashboardPage"
+             Title="Dashboard">
+    <ContentPage.Resources>
+        <Style TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#1976D2" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="10" />
+        </Style>
+    </ContentPage.Resources>
+
+    <StackLayout Padding="20" Spacing="20">
+        <Label Text="{Binding DeviceName}" FontSize="20" FontAttributes="Bold" />
+        <Label Text="{Binding ConnectionStatus}" 
+               TextColor="{Binding ConnectionStatus, Converter={StaticResource StatusToColorConverter}}" />
+        <charts:CartesianChart Series="{Binding SignalStrengthSeries}" 
+                              XAxes="{Binding TimeAxis}" 
+                              HeightRequest="200" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Text="Konfiguruj IR" 
+                    Command="{Binding NavigateToIRConfigCommand}" 
+                    Grid.Column="0" />
+            <Button Text="Konfiguruj FM" 
+                    Command="{Binding NavigateToFMConfigCommand}" 
+                    Grid.Column="1" />
+        </Grid>
+        <Label Text="{Binding NotificationMessage}" 
+               IsVisible="{Binding HasNotification}" 
+               TextColor="#D32F2F" />
+    </StackLayout>
+</ContentPage>
