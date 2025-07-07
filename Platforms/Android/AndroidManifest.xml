@@ -18,7 +18,7 @@
                android:theme="@style/Maui.SplashTheme"
                android:enableOnBackInvokedCallback="true">
 
-    <activity android:name="crc64e1fb321c08285b90.MainActivity"
+    <activity android:name="crc641fb321c08285b0.MainActivity"
               android:exported="true"
               android:launchMode="singleTop"
               android:theme="@style/Maui.SplashTheme"
@@ -31,7 +31,7 @@
     </activity>
 
     <!-- Potencjalne serwisy do komunikacji z urządzeniem radiowym -->
-    <service android:name="crc64e1fb321c08285b90.RadioMonitoringService"
+    <service android:name="crc641fb321c08285b0.RadioMonitoringService"
              android:enabled="true"
              android:exported="false" />
 

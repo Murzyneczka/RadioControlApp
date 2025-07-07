@@ -1,4 +1,32 @@
-# 📱 RadioControlApp v1.0 - Release Notes
+# Radio Control App - Release Notes
+
+## Version 1.1 (Latest)
+**Release Date:** July 2025
+
+### � Bug Fixes
+- **CRITICAL FIX**: Resolved ClassNotFoundException for MainActivity
+  - Fixed corrupted CRC hash in AndroidManifest.xml (`crc641fb321c08285b0` instead of `crc64e1fb321c08285b90`)
+  - Corrected "MainActivityu" to "MainActivity" class reference issue
+  - Updated RadioMonitoringService CRC hash to match
+  
+### 🔧 Technical Updates  
+- Downgraded project from .NET 9 to .NET 8 for better compatibility
+- Updated MAUI package versions to stable .NET 8 releases:
+  - Microsoft.Maui.Controls: 8.0.91
+  - Microsoft.Maui.Controls.Compatibility: 8.0.91
+  - Microsoft.Extensions.Logging.Debug: 8.0.0
+  - Microsoft.Extensions.Http: 8.0.0
+
+### 📱 Version Information
+- Application Version: 2
+- Display Version: 1.1
+- Android Version Code: 2
+
+### 🚀 Deployment
+- App should now launch successfully without ClassNotFoundException
+- Clean installation recommended for existing users experiencing the crash
+
+---
 
 ## 🚀 Pierwsze wydanie - Kompletna aplikacja sterowania urządzeniami radiowymi
 
