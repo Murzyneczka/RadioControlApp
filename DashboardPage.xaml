@@ -2,34 +2,196 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:charts="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             xmlns:converters="clr-namespace:RadioControlApp.Converters"
              x:Class="RadioControlApp.Views.DashboardPage"
              Title="Dashboard">
+    
     <ContentPage.Resources>
+        <!-- Converters -->
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:BoolToStatusColorConverter x:Key="BoolToStatusColorConverter" />
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+        
+        <!-- Styles -->
         <Style TargetType="Button">
             <Setter Property="BackgroundColor" Value="#1976D2" />
             <Setter Property="TextColor" Value="White" />
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="10" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HasShadow" Value="True" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="Padding" Value="15" />
         </Style>
     </ContentPage.Resources>
 
-    <StackLayout Padding="20" Spacing="20">
-        <Label Text="{Binding DeviceName}" FontSize="20" FontAttributes="Bold" />
-        <Label Text="{Binding ConnectionStatus}" 
-               TextColor="{Binding ConnectionStatus, Converter={StaticResource StatusToColorConverter}}" />
-        <charts:CartesianChart Series="{Binding SignalStrengthSeries}" 
-                              XAxes="{Binding TimeAxis}" 
-                              HeightRequest="200" />
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-            <Button Text="Konfiguruj IR" 
-                    Command="{Binding NavigateToIRConfigCommand}" 
-                    Grid.Column="0" />
-            <Button Text="Konfiguruj FM" 
-                    Command="{Binding NavigateToFMConfigCommand}" 
-                    Grid.Column="1" />
-        </Grid>
-        <Label Text="{Binding NotificationMessage}" 
-               IsVisible="{Binding HasNotification}" 
-               TextColor="#D32F2F" />
-    </StackLayout>
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+            
+            <!-- Device Header -->
+            <Frame>
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                    <StackLayout Grid.Column="0">
+                        <Label Text="{Binding DeviceName}" 
+                               FontSize="20" 
+                               FontAttributes="Bold" />
+                        <Label Text="{Binding ConnectionStatus}" 
+                               TextColor="{Binding ConnectionStatus, Converter={StaticResource StatusToColorConverter}}"
+                               FontAttributes="Bold" />
+                        <Label Text="{Binding LastUpdate, StringFormat='Ostatnia aktualizacja: {0:HH:mm:ss}'}" 
+                               FontSize="12" 
+                               TextColor="#666" />
+                    </StackLayout>
+                    
+                    <Button Text="{Binding IsMonitoring, StringFormat='{0}'}"
+                            Command="{Binding ToggleMonitoringCommand}"
+                            BackgroundColor="{Binding IsMonitoring, Converter={StaticResource BoolToStatusColorConverter}}"
+                            Grid.Column="1">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsMonitoring}" Value="True">
+                                <Setter Property="Text" Value="Stop Monitor" />
+                                <Setter Property="BackgroundColor" Value="#F44336" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsMonitoring}" Value="False">
+                                <Setter Property="Text" Value="Start Monitor" />
+                                <Setter Property="BackgroundColor" Value="#4CAF50" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    
+                    <Button Text="Odśwież" 
+                            Command="{Binding RefreshStatusCommand}"
+                            BackgroundColor="#FF6F00"
+                            Grid.Column="2" />
+                </Grid>
+            </Frame>
+            
+            <!-- Status Message -->
+            <Label Text="{Binding NotificationMessage}" 
+                   IsVisible="{Binding HasNotification}" 
+                   TextColor="{Binding HasError, Converter={StaticResource BoolToStatusColorConverter}}"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   Padding="10"
+                   BackgroundColor="#F5F5F5" />
+            
+            <!-- Device Status -->
+            <Frame IsVisible="{Binding DeviceStatus, Converter={StaticResource StringToBoolConverter}}">
+                <StackLayout Spacing="10">
+                    <Label Text="Status urządzenia" 
+                           FontSize="16" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="15">
+                        <StackLayout Grid.Column="0">
+                            <Label Text="Siła sygnału" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding DeviceStatus.SignalStrength, StringFormat='{0}%'}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#4CAF50" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1">
+                            <Label Text="Częstotliwość" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding DeviceStatus.CurrentFrequency, StringFormat='{0:F1} MHz'}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#4CAF50" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2">
+                            <Label Text="Temperatura" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding DeviceStatus.Temperature, StringFormat='{0:F1}°C'}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#4CAF50" />
+                        </StackLayout>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                        <StackLayout Grid.Column="0">
+                            <Label Text="Głośność" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding DeviceStatus.Volume, StringFormat='{0}%'}" 
+                                   FontSize="16" 
+                                   TextColor="#666" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1">
+                            <Label Text="Tryb" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding DeviceStatus.CurrentMode}" 
+                                   FontSize="16" 
+                                   TextColor="#666" />
+                        </StackLayout>
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Real-time Chart -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Monitorowanie w czasie rzeczywistym" 
+                           FontSize="16" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    <charts:CartesianChart Series="{Binding SignalStrengthSeries}" 
+                                          XAxes="{Binding TimeAxis}" 
+                                          HeightRequest="200" />
+                </StackLayout>
+            </Frame>
+            
+            <!-- Quick Stats -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Podsumowanie" 
+                           FontSize="16" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                        <StackLayout Grid.Column="0">
+                            <Label Text="Kody IR" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding TotalIRCodes}" 
+                                   FontSize="24" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#FF6F00"
+                                   HorizontalTextAlignment="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1">
+                            <Label Text="Stacje FM" FontSize="12" TextColor="#666" />
+                            <Label Text="{Binding TotalFMStations}" 
+                                   FontSize="24" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#4CAF50"
+                                   HorizontalTextAlignment="Center" />
+                        </StackLayout>
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Navigation Buttons -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Konfiguracja" 
+                           FontSize="16" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Konfiguruj IR" 
+                                Command="{Binding NavigateToIRConfigCommand}" 
+                                BackgroundColor="#FF6F00"
+                                Grid.Column="0" />
+                        <Button Text="Konfiguruj FM" 
+                                Command="{Binding NavigateToFMConfigCommand}" 
+                                BackgroundColor="#4CAF50"
+                                Grid.Column="1" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

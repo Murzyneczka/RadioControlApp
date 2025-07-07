@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RadioControlApp.Views.IRConfigurationPage"
+             Title="Konfiguracja IR">
+    
+    <ContentPage.Resources>
+        <Style TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#1976D2" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        
+        <Style TargetType="Entry">
+            <Setter Property="BackgroundColor" Value="#F5F5F5" />
+            <Setter Property="TextColor" Value="#333" />
+            <Setter Property="PlaceholderColor" Value="#666" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="HeightRequest" Value="40" />
+        </Style>
+        
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HasShadow" Value="True" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="Padding" Value="15" />
+        </Style>
+    </ContentPage.Resources>
+    
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+            
+            <!-- Status Message -->
+            <Label Text="{Binding StatusMessage}" 
+                   IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"
+                   TextColor="{Binding HasError, Converter={StaticResource BoolToStatusColorConverter}}"
+                   FontAttributes="Bold" />
+            
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsVisible="{Binding IsLoading}" 
+                             IsRunning="{Binding IsLoading}"
+                             Color="#1976D2" />
+            
+            <!-- Add New IR Code Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Dodaj nowy kod IR" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#1976D2" />
+                    
+                    <Entry Text="{Binding NewCode.Name}" 
+                           Placeholder="Nazwa kodu (np. Power ON)" />
+                    
+                    <Entry Text="{Binding NewCode.HexCode}" 
+                           Placeholder="Kod HEX (np. A1B2C3)" 
+                           Keyboard="Text" />
+                    
+                    <Entry Text="{Binding NewCode.Description}" 
+                           Placeholder="Opis (opcjonalny)" />
+                    
+                    <Picker Title="Kategoria" 
+                            SelectedItem="{Binding NewCode.Category}">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>General</x:String>
+                                <x:String>TV</x:String>
+                                <x:String>Audio</x:String>
+                                <x:String>Air Conditioning</x:String>
+                                <x:String>Lighting</x:String>
+                                <x:String>Other</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                    
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Dodaj kod" 
+                                Command="{Binding AddCodeCommand}"
+                                Grid.Column="0" />
+                        <Button Text="Test kodu" 
+                                Command="{Binding TestCodeCommand}"
+                                CommandParameter="{Binding NewCode.HexCode}"
+                                BackgroundColor="#FF6F00"
+                                Grid.Column="1" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Quick Test Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Label Text="Szybki test kodu" 
+                           FontSize="16" 
+                           FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Entry x:Name="QuickTestEntry" 
+                               Placeholder="Wprowadź kod HEX do testowania"
+                               Grid.Column="0" />
+                        <Button Text="Testuj" 
+                                Command="{Binding TestCodeCommand}"
+                                CommandParameter="{Binding Source={x:Reference QuickTestEntry}, Path=Text}"
+                                BackgroundColor="#4CAF50"
+                                Grid.Column="1" />
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Stored Codes Section -->
+            <Frame>
+                <StackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Zapisane kody IR" 
+                               FontSize="18" 
+                               FontAttributes="Bold" 
+                               TextColor="#1976D2"
+                               Grid.Column="0" />
+                        <Button Text="Odśwież" 
+                                Command="{Binding LoadCodesCommand}"
+                                BackgroundColor="#4CAF50"
+                                FontSize="12"
+                                Grid.Column="1" />
+                    </Grid>
+                    
+                    <CollectionView ItemsSource="{Binding StoredCodes}"
+                                    SelectedItem="{Binding SelectedCode}"
+                                    SelectionMode="Single">
+                        <CollectionView.EmptyView>
+                            <Label Text="Brak zapisanych kodów IR" 
+                                   HorizontalTextAlignment="Center" 
+                                   TextColor="#666" />
+                        </CollectionView.EmptyView>
+                        
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,5">
+                                    <Frame BackgroundColor="#F8F9FA" 
+                                           CornerRadius="5" 
+                                           Margin="0,2"
+                                           Padding="10">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" 
+                                              ColumnSpacing="10">
+                                            
+                                            <!-- Code Info -->
+                                            <StackLayout Grid.Column="0">
+                                                <Label Text="{Binding Name}" 
+                                                       FontAttributes="Bold" 
+                                                       FontSize="16" />
+                                                <Label Text="{Binding HexCode}" 
+                                                       FontFamily="Courier" 
+                                                       TextColor="#666" />
+                                                <Label Text="{Binding Category}" 
+                                                       FontSize="12" 
+                                                       TextColor="#999" />
+                                                <Label Text="{Binding UsageCount, StringFormat='Użyto: {0} razy'}" 
+                                                       FontSize="10" 
+                                                       TextColor="#999" />
+                                            </StackLayout>
+                                            
+                                            <!-- Action Buttons -->
+                                            <Button Text="Wyślij" 
+                                                    Command="{Binding Path=BindingContext.SendCodeCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#4CAF50"
+                                                    FontSize="12"
+                                                    Grid.Column="1" />
+                                            
+                                            <Button Text="Usuń" 
+                                                    Command="{Binding Path=BindingContext.DeleteCodeCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#F44336"
+                                                    FontSize="12"
+                                                    Grid.Column="2" />
+                                        </Grid>
+                                    </Frame>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+            
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
