@@ -34,9 +34,10 @@ jobs:
     - name: 📱 Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: ${{ env.ANDROID_API_LEVEL }}
-        build-tools: '34.0.0'
-        ndk: '25.2.9519653'
+        packages: |
+          api-level: ${{ env.ANDROID_API_LEVEL }}
+          build-tools: '34.0.0'
+          ndk: '25.2.9519653'
 
     - name: 🔧 Install MAUI Workloads
       run: |
