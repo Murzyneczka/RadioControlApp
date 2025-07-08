@@ -92,9 +92,10 @@ jobs:
     - name: 📱 Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        api-level: ${{ env.ANDROID_API_LEVEL }}
-        build-tools: '34.0.0'
-        ndk: '25.2.9519653'
+        packages: |
+          api-level: ${{ env.ANDROID_API_LEVEL }}
+          build-tools: '34.0.0'
+          ndk: '25.2.9519653'
 
     - name: 🔧 Install MAUI Workloads
       run: |
@@ -234,7 +235,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.create-release.upload_url }}
         asset_path: ${{ steps.find-release-apk.outputs.apk_path }}
         asset_name: ${{ steps.find-release-apk.outputs.apk_name }}
         asset_content_type: application/vnd.android.package-archive
