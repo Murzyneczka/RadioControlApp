@@ -14,30 +14,20 @@
         <Setter Property="Padding" Value="14,10" />
         <Setter Property="MinimumHeightRequest" Value="44" />
         <Setter Property="MinimumWidthRequest" Value="44" />
-        <Setter Property="VisualStateManager.VisualStateGroups">
-            <VisualStateGroupList>
-                <VisualStateGroup x:Name="CommonStates">
-                    <VisualState x:Name="Normal" />
-                    <VisualState x:Name="Disabled">
-                        <VisualState.Setters>
-                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
-                            <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
+        <Style.Triggers>
+            <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextDisabled}, Dark={StaticResource TextDisabled}}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Entry Styles -->
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurface}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource Surface}}" />
-<!--<<<<<< cursor/design-remote-control-application-functions-d9c3
-=======
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
->>>>>>--> main
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="14" />
@@ -49,14 +39,6 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurface}}" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="VisualStateManager.VisualStateGroups">
-            <VisualStateGroupList>
-                <VisualStateGroup x:Name="CommonStates">
-                    <VisualState x:Name="Normal" />
-                    <VisualState x:Name="Selected" />
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
     </Style>
 
     <!-- Frame Styles -->
