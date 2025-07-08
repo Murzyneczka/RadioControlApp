@@ -111,9 +111,8 @@ When creating a pull request:
 Add these badges to your main README.md:
 
 ```markdown
-![CI/CD](https://github.com/Murzyneczka/RadioControlApp/workflows/.NET%20MAUI%20CI/CD/badge.svg)
+[![.NET MAUI CI/CD](https://github.com/Murzyneczka/RadioControlApp/actions/workflows/dotnet.yml/badge.svg?branch=main&event=release)](https://github.com/Murzyneczka/RadioControlApp/actions/workflows/dotnet.yml)
 ![PR Validation](https://github.com/Murzyneczka/RadioControlApp/workflows/Pull%20Request%20Validation/badge.svg)
-![.NET MAUI CI/CD](https://github.com/Murzyneczka/RadioControlApp/actions/workflows/dotnet.yml/badge.svg?event=release)](https://github.com/Murzyneczka/RadioControlApp/actions/workflows/dotnet.yml)
 ```
 
 ## 🔧 Customization
