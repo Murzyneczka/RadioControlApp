@@ -25,13 +25,9 @@
 
     <!-- Entry Styles -->
     <Style TargetType="Entry">
-      <Style.Triggers>
-         <Trigger TargetType="Button" Property="IsEnabled" Value="True">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurface}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource Surface}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
-         </Trigger>
-      </Style.Triggers>
+        <!--<Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />-->
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondary}}" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="14" />
