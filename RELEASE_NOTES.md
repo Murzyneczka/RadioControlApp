@@ -3,11 +3,27 @@
 ## Version 1.1 (Latest)
 **Release Date:** July 2025
 
-### � Bug Fixes
+### 🐛 Bug Fixes
 - **CRITICAL FIX**: Resolved ClassNotFoundException for MainActivity
   - Fixed corrupted CRC hash in AndroidManifest.xml (`crc641fb321c08285b0` instead of `crc64e1fb321c08285b90`)
   - Corrected "MainActivityu" to "MainActivity" class reference issue
   - Updated RadioMonitoringService CRC hash to match
+
+- **Configuration Fix**: Resolved base URL configuration in MauiProgram.cs
+  - Cleaned up merge conflict markers and comments
+  - Properly implemented configuration loading from appsettings.json
+  - Added embedded resource support for configuration files
+
+- **Asset Management Fix**: Fixed MauiAsset configuration in project file
+  - Changed backslashes to forward slashes for cross-platform compatibility
+  - Added conditional inclusion for Raw assets directory
+  - Created Resources/Raw directory with sample API endpoint configuration
+
+- **XAML Compilation Fix**: Resolved XFC0009 error in Resources/Styles/Styles.xaml
+  - Fixed incorrect VisualStateManager.VisualStateGroups syntax wrapped in Setter tags
+  - Replaced with proper Style.Triggers for disabled button states
+  - Cleaned up merge conflict markers in Entry style
+  - Simplified Label style by removing unnecessary VisualStateManager
   
 ### 🔧 Technical Updates  
 - Downgraded project from .NET 9 to .NET 8 for better compatibility
@@ -16,6 +32,7 @@
   - Microsoft.Maui.Controls.Compatibility: 8.0.91
   - Microsoft.Extensions.Logging.Debug: 8.0.0
   - Microsoft.Extensions.Http: 8.0.0
+- Added Microsoft.Extensions.Configuration.Json: 8.0.0 for configuration support
 
 ### 📱 Version Information
 - Application Version: 2
@@ -24,6 +41,8 @@
 
 ### 🚀 Deployment
 - App should now launch successfully without ClassNotFoundException
+- Configuration management improved with proper embedded resource loading
+- Asset handling fixed for better cross-platform compatibility
 - Clean installation recommended for existing users experiencing the crash
 
 ---

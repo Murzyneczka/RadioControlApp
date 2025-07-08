@@ -1,0 +1,27 @@
+{
+  "api": {
+    "version": "1.1",
+    "endpoints": {
+      "device": {
+        "status": "/api/device/status",
+        "control": "/api/device/control",
+        "monitoring": "/api/device/monitoring"
+      },
+      "fm": {
+        "stations": "/api/fm/stations",
+        "frequency": "/api/fm/frequency",
+        "volume": "/api/fm/volume"
+      },
+      "ir": {
+        "codes": "/api/ir/codes",
+        "send": "/api/ir/send",
+        "learn": "/api/ir/learn"
+      }
+    },
+    "defaultHeaders": {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "User-Agent": "RadioControlApp/1.1"
+    }
+  }
+}
